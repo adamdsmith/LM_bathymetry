@@ -1,4 +1,4 @@
-pacman::p_load(leaflet, RColorBrewer)
+pacman::p_load(ggplot2, ggmap, viridis)
 
 # Reproject lake boundary and points to lat/lon
 if (!exists("LM")) {
@@ -6,17 +6,20 @@ if (!exists("LM")) {
   LM <- readOGR("./Output", "LM_poly", verbose = FALSE)
   LM <- gBuffer(LM, byid = TRUE, width = 0) # To correct invalid geometry
 }
-LM_ll <- spTransform(LM, CRS("+proj=longlat +datum=WGS84"))
+LM <- spTransform(LM, CRS("+proj=longlat +datum=WGS84"))
+LM_bb <- bbox(LM) + matrix(c(-0.01, 0.01, -0.01, 0.01), nrow=2, byrow=TRUE)
+LM <- fortify(LM, regions = "basin")
 
 # Create map
-p <- leaflet() %>%
-  # Base map group
-  addTiles("http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-           group = "Aerial") %>%
-  addTiles("http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-           group = "Terrain") %>%
-  # Add Lake Mattamuskeet boundary
-  addPolygons(data = LM_ll, fillOpacity = 0, smoothFactor = 0.5,
-              color = "yellow", weight = 3) %>%
-  addLayersControl(baseGroups = c("Aerial", "Terrain")) %>%
-  addScaleBar(position = "bottomright") 
+LM_map <- get_map(location = LM_bb, zoom = 11, maptype = "satellite", source = "google")
+p <- ggmap(LM_map) +
+  geom_path(data=LM, aes(x = long, y = lat, group = group), size=0.5,
+            colour = viridis(1, b = 0.9)) + 
+  #  geom_map(data = LM, map = LM,
+#           aes(x = long, y = lat, map_id = id),
+#           color = viridis(1, b = 1), fill = NA) +
+  coord_fixed(xlim = LM_bb[1, ], ylim = LM_bb[2, ]) +
+  xlab(NULL) + ylab(NULL)
+
+
+
