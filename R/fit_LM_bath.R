@@ -13,6 +13,7 @@ fit_LM_bath <- function(bath_data = NULL,
   
   if (is.null(seed)) r_seed <- sample(2^30, 1) else r_seed <- seed
   
+  # Convert depths to negative values
   bath_data$depth <- -1 * bath_data$depth
   
   if (!("pacman" %in% installed.packages())) 
@@ -157,6 +158,7 @@ fit_LM_bath <- function(bath_data = NULL,
   }
   
   if (pred_rast && east && west) {
+    save(w_soap_pred_rast, e_soap_pred_rast, file = "./Output/basin_bathymetry_rasters.rda")
     lake_soap <- mosaic(e_soap_pred_rast, w_soap_pred_rast, fun = mean)
     lake_se <- mosaic(e_soap_pred_se, w_soap_pred_se, fun = mean)
   } else if (west) {
@@ -176,8 +178,8 @@ fit_LM_bath <- function(bath_data = NULL,
       # Define coordinate system
       bath_rasts <- stack(lake_soap, lake_se)
       projection(bath_rasts) <- CRS("+proj=utm +zone=18 +ellps=GRS80 +datum=NAD83 +units=m +no_defs")
-      writeRaster(bath_rasts[[1]], filename = "./Output/LM_bath.tif")
-      writeRaster(bath_rasts[[2]], filename = "./Output/LM_bath_se.tif")
+      writeRaster(bath_rasts[[1]], filename = "./Output/LM_bath.tif", overwrite = TRUE)
+      writeRaster(bath_rasts[[2]], filename = "./Output/LM_bath_se.tif", overwrite = TRUE)
     }
     
   }
