@@ -8,10 +8,6 @@
 # RStudio files
 .Rproj.user/
 
-# knitr and R markdown default cache directories
-/*_cache/
-/cache/
-
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
@@ -19,3 +15,6 @@
 
 # High resolution (1-m) NAIP images
 /GIS/NAIP14/1_m/
+
+# HTML version of README
+README.html
